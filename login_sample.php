@@ -1,4 +1,9 @@
 <?php
+	
+	// Loon AB'i ühenduse
+	require ("../config.php");
+	$database = "if15_reiorau";
+	$mysqli = new mysqli($servername, $username, $password, $database);
 
   // muuutujad errorite jaoks
 	$email_error = "";
@@ -62,9 +67,18 @@
 			}
 
 			if(	$create_email_error == "" && $create_password_error == ""){
-				echo "Võib kasutajat luua! Kasutajanimi on ".$create_email." ja parool on ".$create_password;
-      }
+				
+				$hash = hash("sha512", $create_password);
+				
+				echo "Võib kasutajat luua! Kasutajanimi on ".$create_email." ja parool on ".$create_password." ja räsi on ".$hash;
+				
+				$stmt = $mysqli->prepare("INSERT INTO user_sample (email, password) VALUES (?,?)");
+				// asendame ? märgid, ss - s on string email, s on string password
+				$stmt->bind_param("ss", $create_email, $hash);
+				$stmt->execute();
+				$stmt->close();
 
+			}
     } // create if end
 
 	}
@@ -76,7 +90,9 @@
   	$data = htmlspecialchars($data);
   	return $data;
   }
-
+  
+   // Ühendus kinni
+   $mysqli->close();
 ?>
 <!DOCTYPE html>
 <html>
